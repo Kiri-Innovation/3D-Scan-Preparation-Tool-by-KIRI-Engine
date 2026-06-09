@@ -1,5 +1,8 @@
 # 3D Scan Prep Tool
 
+<img width="1899" height="1060" alt="image" src="https://github.com/user-attachments/assets/57c30b38-c91a-440d-89d2-14f3708012dd" />
+
+
 3D Scan Prep Tool is an open-source desktop app for preparing image and video
 datasets for photogrammetry and 3D scanning workflows.
 

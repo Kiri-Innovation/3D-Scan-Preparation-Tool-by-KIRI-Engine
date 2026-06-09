@@ -40,6 +40,14 @@ if (-not $IsccExe) {
     throw "Inno Setup compiler was not found. Install Inno Setup 6 from https://jrsoftware.org/isdl.php and run this script again."
 }
 
+$OutputDir = Join-Path $RepoRoot "Packaged"
+if (Test-Path -LiteralPath $OutputDir) {
+    Get-ChildItem -LiteralPath $OutputDir -Filter "$AppName*" -File |
+        Remove-Item -Force
+} else {
+    New-Item -ItemType Directory -Path $OutputDir | Out-Null
+}
+
 Write-Host ""
 Write-Host "Using Inno compiler:"
 Write-Host "  $IsccExe"
@@ -50,5 +58,6 @@ Write-Host "Building installer..."
 Write-Host ""
 Write-Host "Installer build complete."
 Write-Host "Output folder:"
-Write-Host "  $(Join-Path $RepoRoot 'Packaged')"
-
+Write-Host "  $OutputDir"
+Write-Host ""
+Write-Host "Upload the setup EXE and all matching BIN parts from that folder."

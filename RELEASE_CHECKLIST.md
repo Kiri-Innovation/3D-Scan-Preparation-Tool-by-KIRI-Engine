@@ -63,6 +63,20 @@ Then test the installer from:
 Packaged\
 ```
 
+The Windows CUDA installer is split into multiple files so each GitHub Release
+asset stays under the upload limit. Upload every file produced in `Packaged\`
+for the Windows installer:
+
+```text
+3D Scan Prep Tool.exe
+3D Scan Prep Tool-1.bin
+3D Scan Prep Tool-2.bin
+...
+```
+
+Users must download all Windows installer parts into the same folder, then run
+`3D Scan Prep Tool.exe`.
+
 ## macOS Build
 
 Run these from the repo root on a Mac:
@@ -108,7 +122,7 @@ Before marking a release ready, test at least:
 
 Recommended GitHub Release assets:
 
-- Windows installer `.exe`
+- Windows installer `.exe` plus all matching `.bin` parts
 - macOS `.dmg`
 - `_AI_Models` zip
 

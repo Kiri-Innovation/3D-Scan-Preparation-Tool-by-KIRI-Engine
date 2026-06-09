@@ -29,6 +29,9 @@ SetupIconFile={#ProjectRoot}\KIRI Logo ICO.ico
 SolidCompression=yes
 Compression=lzma2/ultra64
 LZMAAlgorithm=1
+DiskSpanning=yes
+SlicesPerDisk=1
+DiskSliceSize=1900000000
 WizardStyle=modern dynamic
 
 [Languages]
@@ -47,4 +50,3 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilen
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-

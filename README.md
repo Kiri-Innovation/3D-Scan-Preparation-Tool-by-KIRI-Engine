@@ -27,13 +27,19 @@ Normal users should download installers from the GitHub Releases page.
 Recommended release assets:
 
 ```text
-3D-Scan-Prep-Tool-Windows-vX.Y.Z.exe
+3D Scan Prep Tool.exe
+3D Scan Prep Tool-1.bin
+3D Scan Prep Tool-2.bin
 3D-Scan-Prep-Tool-macOS-arm64-vX.Y.Z.dmg
 _AI_Models-vX.Y.Z.zip
 ```
 
 The Windows and macOS installers include the app, Electron interface, Python
 backend, and AI models.
+
+The Windows CUDA installer is split into one setup `.exe` plus one or more
+`.bin` data files because the full GPU-enabled build is large. Download all
+Windows installer parts into the same folder, then run `3D Scan Prep Tool.exe`.
 
 ## Important Safety Note
 

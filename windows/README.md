@@ -50,7 +50,22 @@ Outputs:
 dist\ScanPrep Tool Backend\ScanPrep Tool Backend.exe
 dist\3D Scan Prep Tool\3D Scan Prep Tool.exe
 Packaged\3D Scan Prep Tool.exe
+Packaged\3D Scan Prep Tool-*.bin
 ```
+
+The full Windows CUDA build is large, so the Inno installer is split into
+multiple release files:
+
+```text
+3D Scan Prep Tool.exe
+3D Scan Prep Tool-1.bin
+3D Scan Prep Tool-2.bin
+...
+```
+
+Upload all Windows installer parts to the GitHub Release. Users should download
+every Windows installer part into the same folder, then run
+`3D Scan Prep Tool.exe`.
 
 ## Hardware Notes
 

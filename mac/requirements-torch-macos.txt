@@ -1,0 +1,6 @@
+# Standard PyTorch macOS wheels.
+# Apple Silicon Macs may use MPS acceleration when supported by PyTorch.
+# Intel Macs and unsupported hardware should fall back to CPU.
+torch==2.10.0
+torchvision==0.25.0
+

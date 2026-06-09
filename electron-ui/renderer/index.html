@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KIRI Tools ScanPrep</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <img class="brand-logo" src="../../Images and Icons/KIRI Tools logo.png" alt="KIRI Tools" />
+          <div>
+            <div class="brand-title">KIRI Tools</div>
+            <div class="brand-subtitle">ScanPrep Tool</div>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button class="ghost-button" id="diagnosticsButton" data-help="Opens setup and tool notes such as GPU availability, CPU fallback, video support, and Python environment status.">Diagnostics</button>
+          <div class="run-indicator" aria-live="polite">
+            <span id="runStatus">Ready</span>
+            <div class="run-progress"><span id="runProgress"></span></div>
+          </div>
+          <button class="primary-button" id="runButton" data-help="Starts the current ScanPrep batch using the settings shown from left to right.">Run</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="pipeline" aria-label="ScanPrep pipeline">
+          <article class="stage-card active" data-stage="source">
+            <div class="stage-number">01</div>
+            <h2>Source & Sort</h2>
+            <p class="stage-note">Choose input, output, file types, and optional session sorting.</p>
+
+            <div class="mode-row source-mode-grid">
+              <button class="segmented source-wide active" data-input-mode="images" data-help="Process image folders such as RAW, JPG, PNG, TIFF, and HEIC files.">Images</button>
+              <button class="segmented" data-input-mode="video" data-help="Extract frames from a normal video before running scan-prep tools.">Video</button>
+              <button class="segmented" data-input-mode="videoFolder" data-help="Extract frames from every video in a folder. Useful for mixed-source landmark or object footage.">Video Folder</button>
+              <button class="segmented source-wide" data-input-mode="360" data-help="Process 360 video and unwrap it into view images for reconstruction.">360</button>
+            </div>
+
+            <div id="videoSettings" class="conditional-block hidden">
+              <label id="videoFrameLabel" class="field-label">Target frames</label>
+              <div class="mini-grid frame-sampling-grid">
+                <select id="videoFrameMode" data-help="Choose whether to extract a target number of frames or keep every Nth frame from the video.">
+                  <option>Target frame count</option>
+                  <option>Every Nth frame</option>
+                </select>
+                <input id="videoFrameTarget" class="compact-field" value="300" data-help="How many frames to extract from the selected video before processing." />
+              </div>
+              <div id="videoExtractMethodBlock" class="conditional-block extraction-method-block">
+                <label class="field-label">Extraction method</label>
+                <select id="videoExtractMethod" data-help="Fast extraction jumps to target timestamps and is best for long or large videos. Accurate extraction scans the video timeline more carefully but can take much longer.">
+                  <option>Fast extraction</option>
+                  <option>Accurate extraction</option>
+                </select>
+              </div>
+              <div id="videoFrameHint" class="stage-inline-note" data-help="Clarifies whether the frame count applies to one video or each video in a folder.">300 frames from the selected video.</div>
+              <label class="field-label">Video resolution</label>
+              <select id="videoResolution" data-help="Optionally downscale extracted video frames before processing. Native keeps the original video resolution.">
+                <option>Native</option>
+                <option>4K (3840x2160)</option>
+                <option>1440p (2560x1440)</option>
+                <option>1080p (1920x1080)</option>
+              </select>
+              <div id="sceneSplitBlock">
+                <label class="toggle-line" data-help="Detect strong video scene changes and create separate scene/session folders before sharpness, masks, and processing run."><input id="sceneSplitToggle" type="checkbox" /> Create sessions from scene changes</label>
+                <div id="sceneSplitSettings" class="conditional-block hidden">
+                  <label class="field-label">Scene detection</label>
+                  <div class="mini-grid">
+                    <select id="sceneSensitivity" data-help="Controls how easily ScanPrep detects a new scene. High catches more cuts; Low catches only stronger changes.">
+                      <option>Normal</option>
+                      <option>Low</option>
+                      <option>High</option>
+                    </select>
+                    <input id="sceneMinSeconds" class="compact-field" value="4" data-help="Ignores scene cuts shorter than this many seconds so tiny flashes do not become their own scan session." />
+                  </div>
+                  <div id="sceneSplitHint" class="stage-inline-note" data-help="Scene detection scans the video once before extraction, then extracts each detected scene into its own session folder.">Minimum scene length: 4 seconds.</div>
+                  <div class="scene-scan-warning" data-help="Scene detection must inspect the full video before extracting frames. Very long videos can take a while before frame extraction starts.">Scans the whole video before extraction. Long videos may take a while.</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="settings360" class="conditional-block hidden">
+              <label class="field-label">360 views</label>
+              <select id="view360Mode" data-help="Controls how many perspective views are created from each 360 frame. More views give more coverage but create more files.">
+                <option>Standard 14 views</option>
+                <option>Side-only 8 views</option>
+                <option>Balanced 18 views</option>
+                <option>Dense 26 views</option>
+              </select>
+              <label class="toggle-line" data-help="Include downward-looking 360 views. Turn this off when the bottom of the 360 video contains the photographer, tripod, or selfie stick."><input id="include360BottomViews" type="checkbox" checked /> Include lower views</label>
+              <div id="views360Hint" class="stage-inline-note" data-help="Shows how many perspective images ScanPrep will create from each extracted 360 frame.">14 views per frame</div>
+            </div>
+
+            <label class="field-label">Input</label>
+            <div class="path-row">
+              <input id="inputPath" class="path-field" placeholder="Choose folder..." readonly data-help="The source folder or video file to prepare." />
+              <button class="icon-button" id="chooseInputButton" title="Choose input folder" data-help="Choose the folder or file ScanPrep should read from.">...</button>
+            </div>
+
+            <label class="field-label">Output</label>
+            <div class="path-row">
+              <input id="outputPath" class="path-field" placeholder="Auto output folder..." readonly data-help="Where ScanPrep writes sorted originals, masks, processed images, and logs." />
+              <button class="icon-button" id="chooseOutputButton" title="Choose output folder" data-help="Choose a different output folder if you do not want the automatic one.">...</button>
+            </div>
+
+            <label id="subfolderModeLabel" class="field-label">Image Search</label>
+            <select id="subfolderMode" data-help="Controls where ScanPrep looks for images inside the selected input folder.">
+              <option>Include all subfolders</option>
+              <option>Top folder only</option>
+              <option>Include direct subfolders</option>
+              <option>Subfolders are sessions</option>
+            </select>
+
+            <label id="folderDepthLabel" class="field-label">Video Folder Search</label>
+            <select id="folderSearchDepth" data-help="Limits how many folder levels below the selected video folder ScanPrep is allowed to scan.">
+              <option>Unlimited</option>
+              <option>0 - Top folder only</option>
+              <option>1 level deep</option>
+              <option>2 levels deep</option>
+              <option>3 levels deep</option>
+              <option>4 levels deep</option>
+            </select>
+
+            <div id="fileTypeGrid" class="checkbox-grid file-grid">
+              <label data-help="Include JPG and JPEG images."><input id="fileJpg" type="checkbox" checked /> JPG</label>
+              <label data-help="Include PNG images."><input id="filePng" type="checkbox" checked /> PNG</label>
+              <label data-help="Include TIFF images."><input id="fileTiff" type="checkbox" checked /> TIFF</label>
+              <label data-help="Include HEIC and HEIF images when HEIC support is installed."><input id="fileHeic" type="checkbox" checked /> HEIC</label>
+              <label data-help="Include supported camera RAW files."><input id="fileRaw" type="checkbox" checked /> RAW</label>
+            </div>
+
+            <label id="preserveOriginalsOption" class="toggle-line" data-help="When enabled, ScanPrep copies originals instead of moving them during sorting or blur isolation."><input id="preserveOriginals" type="checkbox" /> Preserve originals</label>
+
+            <label id="sortSessionsOption" class="toggle-line" data-help="Splits an unorganized folder into scan sessions using capture time, with optional geometry checks."><input id="sortSessionsToggle" type="checkbox" /> Sort into sessions</label>
+
+            <div id="sortSettings" class="conditional-block hidden">
+              <label class="field-label">Session rules</label>
+              <div class="mini-grid session-rules-grid">
+                <label class="compact-field-group" data-help="If the time gap between photos is larger than this many seconds, ScanPrep starts a new session.">
+                  <span>Time gap</span>
+                  <input id="sessionTimeGap" class="compact-field" value="60" />
+                </label>
+                <label class="compact-field-group" data-help="Sessions smaller than this are routed into the small-dataset area.">
+                  <span>Min images</span>
+                  <input id="sessionMinImages" class="compact-field" value="50" />
+                </label>
+              </div>
+              <label class="toggle-line" data-help="Uses image feature matching to keep visually connected photos together even when capture times have gaps."><input id="bridgeByImageMatch" type="checkbox" /> Bridge by image match</label>
+            </div>
+          </article>
+
+          <article class="stage-card" data-stage="sharpness">
+            <div class="stage-number">02</div>
+            <h2>Sharpness</h2>
+            <p class="stage-note">Isolate blurry or weaker images after source handling.</p>
+
+            <label class="field-label">Blur workflow</label>
+            <select id="sharpnessMode" data-help="Choose which group of images ScanPrep should isolate based on sharpness scoring.">
+              <option>Isolate Blurry Images</option>
+              <option>Isolate Sharpest Images</option>
+              <option>Isolate Weakest in Cluster</option>
+            </select>
+
+            <div id="blurSensitivityBlock" class="conditional-block">
+              <div class="slider-row" data-help="Controls how aggressively blurry images are isolated. Lower values isolate only obvious blur; higher values isolate more borderline images."><span>Sensitivity</span><input id="blurSensitivity" type="range" min="1" max="100" value="35" /></div>
+            </div>
+
+            <div id="sharpestCountBlock" class="conditional-block hidden">
+              <label class="field-label">Keep count</label>
+              <input id="sharpestKeepCount" class="compact-field" value="300" data-help="For large datasets or video frames, keep this many of the sharpest images and isolate the rest." />
+            </div>
+
+            <div id="clusterSizeBlock" class="conditional-block hidden">
+              <label class="field-label">Cluster size</label>
+              <input id="sharpnessClusterSize" class="compact-field" value="5" data-help="Checks each nearby group of this many images and isolates the weakest one from that group." />
+            </div>
+
+            <div class="meter-card" data-help="Shows a simple result after previewing a small sample, such as how many images would be preserved or isolated.">
+              <span>Preview Result</span>
+              <strong id="sharpnessPreviewResult">Preview not run</strong>
+            </div>
+
+            <label class="toggle-line" data-help="Enable sharpness isolation during the full Run. Preview Sharpness Sort can be used first without moving real data."><input id="sharpnessToggle" type="checkbox" /> Use sharpness isolation on Run</label>
+            <button class="secondary-button full" id="previewSharpnessButton" data-help="Samples up to 50 images, creates preserved/isolated preview folders, and opens that preview folder when complete.">Preview Sharpness Sort</button>
+          </article>
+
+          <article class="stage-card" data-stage="masks">
+            <div class="stage-number">03</div>
+            <h2>Masks</h2>
+            <p class="stage-note">Generate scan masks for distractions, sky, and subjects.</p>
+
+            <label class="toggle-line" data-help="Masks people and crowds so they do not influence reconstruction."><input id="maskPeople" type="checkbox" /> People & crowds</label>
+            <label class="toggle-line" data-help="Masks movable accessories such as bags, chairs, or small distracting objects where detected."><input id="maskAccessories" type="checkbox" /> Accessories</label>
+            <label class="toggle-line" data-help="Masks cars, bikes, and other vehicles."><input id="maskVehicles" type="checkbox" /> Vehicles</label>
+            <label class="toggle-line" data-help="Masks sky and clouds, often useful for object and outdoor scans."><input id="maskSky" type="checkbox" /> Sky & clouds</label>
+            <label class="toggle-line" data-help="Creates a subject-focused mask using the subject segmentation model."><input id="maskSubject" type="checkbox" /> Main subject</label>
+            <label id="mask360BottomOption" class="toggle-line hidden" data-help="Masks the bottom area of 360 captures where tripod, floor, or camera operator artifacts often appear."><input id="mask360Bottom" type="checkbox" /> Mask 360 Bottom Area</label>
+            <label class="toggle-line" data-help="Swaps black and white in saved black/white mask images for software that expects the opposite convention."><input id="invertMasks" type="checkbox" /> Invert B/W masks</label>
+
+            <label class="field-label">Export</label>
+            <select id="maskExportType" data-help="Choose whether masks are combined, separated by category, or written as transparent PNG images.">
+              <option>Unified black/white JPG masks</option>
+              <option>Separate black/white JPG masks</option>
+              <option>Transparent PNGs</option>
+            </select>
+
+            <button class="secondary-button full" id="previewMaskButton" data-help="Choose one image and preview the mask result before batch processing.">Preview Masks</button>
+          </article>
+
+          <article class="stage-card" data-stage="processing">
+            <div class="stage-number">04</div>
+            <h2>Processing</h2>
+            <p class="stage-note">Photogrammetry-safe contrast and source balancing.</p>
+
+            <label class="toggle-line" data-help="Enables shadow, highlight, midtone, and strength controls. If this is off and no other processing is enabled, no processed image copy is needed."><input id="adjustContrastToggle" type="checkbox" /> Adjust Contrast</label>
+
+            <div id="contrastControls" class="conditional-block hidden">
+              <div class="slider-row" data-help="Raises or lowers dark image detail for scan-friendly texture visibility."><span>Shadows</span><input id="contrastShadows" type="range" min="-100" max="100" value="0" /></div>
+              <div class="slider-row" data-help="Recovers or lowers bright areas to reduce clipped-looking scan inputs."><span>Highlights</span><input id="contrastHighlights" type="range" min="-100" max="100" value="0" /></div>
+              <div class="slider-row" data-help="Adjusts middle tones without pushing only shadows or highlights."><span>Midtones</span><input id="contrastMidtones" type="range" min="-100" max="100" value="0" /></div>
+              <div class="slider-row" data-help="Controls how strongly the contrast adjustment is applied."><span>Strength</span><input id="contrastStrength" type="range" min="0" max="100" value="50" /></div>
+              <label class="toggle-line" data-help="Reduces the chance of bright details being pushed too far while adjusting contrast."><input id="protectHighlights" type="checkbox" checked /> Protect highlights</label>
+            </div>
+
+            <label class="toggle-line" data-help="Experimental luminance-only local contrast enhancement. Too much can create false texture."><input id="localContrastBoost" type="checkbox" /> Local Contrast Boost</label>
+            <label class="toggle-line" data-help="Experimental single-image exposure-fusion look. Useful sometimes, but less conservative than normal contrast controls."><input id="exposureFusionLook" type="checkbox" /> Exposure Fusion Look</label>
+            <label class="toggle-line" data-help="Applies controlled sharpening to make real image features easier to detect."><input id="featureSharpening" type="checkbox" /> Feature Sharpening</label>
+            <div id="sharpenControls" class="conditional-block hidden">
+              <div class="slider-row" data-help="Controls sharpening strength. Higher values reveal edges more strongly but can create halos."><span>Amount</span><input id="sharpenAmount" type="range" min="0" max="200" value="60" /></div>
+              <div class="slider-row" data-help="Controls the size of features sharpened. Lower values sharpen fine detail; higher values affect broader edges."><span>Radius</span><input id="sharpenRadius" type="range" min="0.2" max="3" step="0.1" value="0.9" /></div>
+              <div class="slider-row" data-help="Avoids sharpening tiny texture/noise. Higher values sharpen only stronger edges."><span>Threshold</span><input id="sharpenThreshold" type="range" min="0" max="50" value="4" /></div>
+            </div>
+
+            <button class="secondary-button full" id="previewContrastButton" data-help="Previews contrast and processing settings on one image before batch processing.">Preview Processing</button>
+          </article>
+
+          <article class="stage-card" data-stage="output">
+            <div class="stage-number">05</div>
+            <h2>Output</h2>
+            <p class="stage-note">Choose file formats and folder routing.</p>
+
+            <div id="processedOutputControls" class="conditional-block">
+              <label id="processedFormatLabel" class="field-label">Processed format</label>
+              <select id="processedFormat">
+                <option>JPG</option>
+                <option>PNG</option>
+                <option>TIFF</option>
+              </select>
+
+              <div id="jpgQualityRow" class="slider-row"><span>JPG quality</span><input id="jpgQuality" type="range" min="70" max="100" value="100" /></div>
+            </div>
+
+            <div id="noProcessedOutputNote" class="stage-inline-note hidden" data-help="No processed-image settings are enabled, so ScanPrep will not create processed image copies.">No processed image copies will be created. Sorting, masks, and originals will still be handled.</div>
+
+            <label class="field-label">If Output Exists</label>
+            <select id="ifOutputExists" data-help="Applies to generated processed images, masks, video frames, 360 views, and other output files.">
+              <option>Auto-number</option>
+              <option>Skip existing</option>
+              <option>Overwrite</option>
+            </select>
+
+            <label class="toggle-line" data-help="Keeps source subfolder layout where possible in generated output."><input id="keepFolderStructure" type="checkbox" /> Keep folder structure</label>
+            <div class="folder-list">
+              <span>_Processed</span>
+              <span>_Processed_Blurry</span>
+              <span>_Blurry_Originals</span>
+              <span>_Masks_Environment</span>
+            </div>
+          </article>
+
+          <article class="stage-card" data-stage="settings">
+            <div class="stage-number">06</div>
+            <h2>Settings</h2>
+            <p class="stage-note">Hardware, cache, and runtime safety.</p>
+
+            <label class="field-label">CPU Workers</label>
+            <div class="meter-card worker-card" data-help="Controls how many CPU workers ScanPrep asks the tool to use. Auto uses this computer's CPU count; AI/GPU jobs may cap workers internally.">
+              <select id="workerMode" data-help="Controls how many CPU workers ScanPrep asks the tool to use. Auto uses this computer's CPU count; AI/GPU jobs may cap workers internally.">
+                <option>Auto</option>
+                <option>1 worker</option>
+                <option>2 workers</option>
+                <option>4 workers</option>
+                <option>6 workers</option>
+                <option>8 workers</option>
+                <option>12 workers</option>
+                <option>16 workers</option>
+              </select>
+              <strong id="workersSummary">Auto</strong>
+            </div>
+            <div class="meter-card">
+              <span>Acceleration</span>
+              <strong>Not tested yet</strong>
+            </div>
+
+            <label class="toggle-line"><input id="autoDeleteCache" type="checkbox" checked /> Auto-delete temp cache</label>
+            <label class="toggle-line"><input id="writeDebugLog" type="checkbox" checked /> Write debug log</label>
+
+            <button class="secondary-button full" id="testGpuButton" data-help="Checks whether this computer can use GPU acceleration. If not, ScanPrep will use CPU.">Test GPU</button>
+            <button class="secondary-button full" id="openEngineLogButton" data-help="Opens detailed processing notes and tool messages for troubleshooting.">Open Tool Log</button>
+          </article>
+        </section>
+
+        <aside class="preview-panel">
+          <div class="preview-header">
+            <div>
+              <h2>Preview</h2>
+              <p>Image, mask, and contrast tests before batch processing.</p>
+            </div>
+            <button class="secondary-button" id="choosePreviewButton" data-help="Choose one image to inspect in the preview area.">Choose Image</button>
+          </div>
+
+          <div class="preview-frame" id="previewFrame">
+            <div class="preview-placeholder">
+              <img src="../../Images and Icons/KIRI Tools logo.png" alt="" />
+              <span>Select an image to preview masks or processing.</span>
+            </div>
+          </div>
+
+          <div class="preview-tools">
+            <button class="segmented active" id="zoomFitButton" data-help="Fits the preview image back into the window and resets panning.">Fit</button>
+            <button class="segmented" id="zoomOutButton" data-help="Zooms the preview out. You can also use the mouse wheel over the preview.">-</button>
+            <button class="segmented" id="zoomInButton" data-help="Zooms the preview in. You can also use the mouse wheel over the preview.">+</button>
+            <span id="zoomReadout" class="zoom-readout">Fit</span>
+          </div>
+
+          <div id="previewVideoPositionBlock" class="preview-position-block hidden">
+            <div class="slider-row" data-help="Chooses where preview frames are grabbed from. 0 is the start, 0.5 is the middle, and 1 is near the end. This affects previews only, not the final extraction count."><span>Preview position</span><input id="videoPreviewPosition" type="range" min="0" max="1" step="0.01" value="0.5" /></div>
+          </div>
+
+          <section class="log-panel">
+            <div class="log-header">
+              <span>Runtime Notes</span>
+              <span class="quiet">Tool Log</span>
+            </div>
+            <div id="logLines" class="log-lines">
+              <p>Ready. Choose input and output, then click Run.</p>
+              <p>Progress, warnings, and completion notes appear here.</p>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="info-footer" aria-live="polite">
+        <span class="info-label">Info</span>
+        <span id="hoverHelp">Hover over a setting to see what it does.</span>
+      </footer>
+    </div>
+
+    <div id="diagnosticsOverlay" class="diagnostics-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="diagnosticsTitle">
+      <section class="diagnostics-panel">
+        <header class="diagnostics-header">
+          <div>
+            <h2 id="diagnosticsTitle">Diagnostics & Tool Log</h2>
+            <p>Computer support, acceleration status, and recent processing notes.</p>
+          </div>
+          <div class="diagnostics-actions">
+            <button class="secondary-button" id="refreshDiagnosticsButton">Refresh</button>
+            <button class="secondary-button" id="closeDiagnosticsButton">Close</button>
+          </div>
+        </header>
+
+        <div class="diagnostics-body">
+          <section class="diagnostics-grid" id="diagnosticsCards">
+            <div class="diag-card"><span>Status</span><strong>Not loaded yet</strong></div>
+          </section>
+
+          <section class="diagnostics-log-wrap">
+            <div class="diagnostics-log-header">
+              <div>
+                <span>Runtime Notes</span>
+                <small id="diagnosticsLogPath">No debug log selected.</small>
+              </div>
+              <div class="diagnostics-actions">
+                <button class="secondary-button" id="openOutputFolderButton">Open Output</button>
+                <button class="secondary-button" id="openDebugLogButton">Open Log File</button>
+              </div>
+            </div>
+            <pre id="diagnosticsLogText" class="diagnostics-log">Open Diagnostics to load system details and the latest tool log.</pre>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

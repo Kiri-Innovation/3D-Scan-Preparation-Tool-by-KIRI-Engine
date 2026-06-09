@@ -1,0 +1,17 @@
+# Keep script line endings stable across Windows and macOS builders.
+*.sh text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+
+# Treat binary assets as binary.
+*.ico binary
+*.icns binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.mp4 binary
+*.mov binary
+*.zip binary
+*.dmg binary
+*.exe binary

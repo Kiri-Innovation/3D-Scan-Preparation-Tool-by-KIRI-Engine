@@ -1,0 +1,13 @@
+# PyTorch CUDA build for the packaged Windows GPU installer.
+# CUDA 12.8 wheels cover newer RTX 50/Blackwell-class GPUs.
+# The app smoke-tests the selected GPU at runtime and falls back to CPU when a
+# GPU, driver, or torch build is unsupported.
+#
+# RTX 20 / Turing: sm_75
+# RTX 30 / Ampere: sm_86
+# RTX 40 / Ada: usually compatible through same-major kernels when direct sm_89 is not printed
+# RTX 50 / Blackwell: sm_120
+--index-url https://download.pytorch.org/whl/cu128
+--extra-index-url https://pypi.org/simple
+torch==2.10.0
+torchvision==0.25.0

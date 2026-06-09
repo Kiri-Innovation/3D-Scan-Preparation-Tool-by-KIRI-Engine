@@ -1,0 +1,56 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.venv-*/
+venv/
+env/
+
+# Node / Electron dependencies and caches
+electron-ui/node_modules/
+electron-ui/.npm-cache/
+npm-debug.log*
+
+# Build outputs
+build/
+dist/
+Packaged/
+windows/pyinstaller/
+mac/pyinstaller/
+*.spec~
+
+# Local generated data and temporary files
+.tmp/
+.tmp_runtime_tests/
+.pip-cache/
+dev_tools/
+tests/
+packaging/
+Test Runs/
+Test Folder/
+_ScanPrep_Output*/
+_ScanPrep_Preview_Cache/
+_debug_timing_log.txt
+
+# AI model weights are distributed through GitHub Releases, not source git.
+_AI_Models/
+*.safetensors
+*.pt
+*.pth
+*.bin
+
+# Local archives and old experiments
+ARCHIVE/
+Archive_To_Delete/
+Trash/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/

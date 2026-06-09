@@ -1,0 +1,14 @@
+{
+  "name": "scanprep-electron-ui",
+  "version": "0.1.0",
+  "description": "Electron UI for ScanPrep Tool.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "38.0.0",
+    "rcedit": "^5.0.2"
+  }
+}

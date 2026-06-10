@@ -5,10 +5,6 @@ This folder is for public Windows build instructions and files.
 Normal users should download the Windows installer from GitHub Releases.
 These notes are for developers who want to build the app themselves.
 
-Public build scripts should use paths relative to the repository folder, not
-paths from one developer's local machine. This lets other Windows builders place
-the project wherever they want.
-
 ## Current Release Build Shape
 
 The Windows app is built in three parts:

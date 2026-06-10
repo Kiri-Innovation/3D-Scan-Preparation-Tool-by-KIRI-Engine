@@ -11,5 +11,4 @@ Build the installer from the repository root with:
 The generated installer is written to the repository `Packaged` folder.
 
 The full CUDA-enabled Windows build is large, so the installer is intentionally
-split into one setup `.exe` plus one or more `.bin` data files. Upload all of
-those files together as GitHub Release assets.
+split into one setup `.exe` plus one or more `.bin` data files.

@@ -27,7 +27,7 @@ sending it to reconstruction software.
 
 Normal users should download installers from the GitHub Releases page.
 
-Recommended release assets:
+Release assets:
 
 ```text
 3D Scan Prep Tool.exe
@@ -62,8 +62,7 @@ The Windows GPU build uses PyTorch CUDA 12.8.
 Expected behavior:
 
 - NVIDIA RTX 20 / 30 / 40 / 50 class cards should use GPU acceleration when the driver supports it.
-- RTX 50 / Blackwell support requires the CUDA 12.8 PyTorch build used by this project.
-- Older NVIDIA GTX 10-series / Pascal cards will likely fall back to CPU.
+- Older NVIDIA GTX 10-series / Pascal cards should fall back to CPU.
 - AMD GPUs, Intel GPUs, unsupported NVIDIA GPUs, and systems without a GPU should fall back to CPU.
 - CPU fallback is slower, especially for AI masking, but should keep the app usable.
 
@@ -73,7 +72,6 @@ Expected behavior:
 
 - Apple Silicon Macs may use PyTorch MPS acceleration when supported.
 - Intel Macs should use CPU fallback.
-- Modern macOS does not use NVIDIA CUDA for this app.
 
 The app has been tested on a limited number of systems. It has not undergone
 extensive testing on every Windows version, macOS version, GPU, driver, CPU, or

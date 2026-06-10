@@ -1,17 +1,7 @@
 # macOS Build Notes
 
-This folder is for public macOS build instructions and scripts.
-
-The macOS app must be built on a real Mac. A Windows machine cannot create the
-final macOS app bundle or installer.
-
-Public build scripts should use paths relative to the repository folder, not
-paths from one developer's local machine. This lets other Mac builders place the
-project wherever they want.
-
 ## Prerequisites
 
-- A real Mac.
 - Python 3.12.
 - Node.js and npm.
 - `_AI_Models` extracted into the repository root.
@@ -72,10 +62,6 @@ Expected macOS behavior:
 
 - Apple Silicon Macs may use PyTorch MPS acceleration when supported.
 - Intel Macs should use CPU fallback.
-- Modern macOS does not use NVIDIA CUDA for this app.
-
-macOS release builds are produced and tested on real Mac hardware before they
-are uploaded.
 
 The app has been tested on a limited number of systems. It has not undergone
 extensive testing on every Mac model, macOS version, GPU/backend, CPU, or

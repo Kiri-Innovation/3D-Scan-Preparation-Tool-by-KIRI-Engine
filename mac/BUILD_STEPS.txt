@@ -3,8 +3,6 @@ macOS build steps
 
 These instructions are for anyone building the macOS release from source.
 
-The build must be run on a real Mac. Windows cannot create the final macOS app.
-
 Before building:
 
 1. Install Python 3.12.
@@ -34,10 +32,6 @@ Outputs:
    dist/3D Scan Prep Tool.app
    Packaged/3D-Scan-Prep-Tool-macOS-<architecture>.dmg
 
-After building:
-
-Open the app and test a small image folder before uploading the DMG to a public
-release.
 
 Unsigned macOS apps may show a security warning. Users may need to right-click
 the app and choose Open unless the app is code signed and notarized.

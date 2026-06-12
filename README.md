@@ -33,7 +33,6 @@ Release assets:
 3D Scan Prep Tool.exe
 3D Scan Prep Tool-1.bin
 3D Scan Prep Tool-2.bin
-3D-Scan-Prep-Tool-macOS-arm64-vX.Y.Z.dmg
 _AI_Models-vX.Y.Z.zip
 ```
 

@@ -37,7 +37,7 @@ Release assets:
 _AI_Models-vX.Y.Z.zip
 ```
 
-The Windows and macOS installers include the app, Electron interface, Python
+The installers include the app, Electron interface, Python
 backend, and AI models.
 
 **Windows Split Installer**
@@ -49,12 +49,6 @@ Windows installer parts into the same folder, then run `3D Scan Prep Tool.exe`.
 
 **macOS Security Warning**
 
-If macOS says the app is damaged or cannot be opened, this is usually caused by Apple Gatekeeper quarantine on unsigned or non-notarized apps.
-Only use this command if you downloaded the app from the official KIRI site or GitHub release and trust the file:
-
-```bash
-sudo xattr -rd com.apple.quarantine "/Applications/3D Scan Prep Tool.app
-```
 
 
 ## Important Safety Note
@@ -81,14 +75,10 @@ Expected behavior:
 
 ### macOS
 
-Expected behavior:
+A fully working Mac build and installers is not yet available.
+Some in-progress scripts for mac exist but likely have bugs, or UI scaling errors.
+We may continue working on a fully installer and tested mac build in the future when avilable.
 
-- Apple Silicon Macs may use PyTorch MPS acceleration when supported.
-- Intel Macs should use CPU fallback.
-
-The app has been tested on a limited number of systems. It has not undergone
-extensive testing on every Windows version, macOS version, GPU, driver, CPU, or
-folder/path combination. More user testing may reveal bugs on specific machines.
 
 ## Building From Source
 

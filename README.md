@@ -40,9 +40,19 @@ _AI_Models-vX.Y.Z.zip
 The Windows and macOS installers include the app, Electron interface, Python
 backend, and AI models.
 
+**Windows Split Installer**
+
 The Windows CUDA installer is split into one setup `.exe` plus one or more
 `.bin` data files because the full GPU-enabled build is large. Download all
 Windows installer parts into the same folder, then run `3D Scan Prep Tool.exe`.
+
+**macOS Security Warning**
+
+If macOS says the app is damaged or cannot be opened, this is usually caused by Apple Gatekeeper quarantine on unsigned or non-notarized apps.
+Only use this command if you downloaded the app from the official KIRI site or GitHub release and trust the file:
+
+```bash
+sudo xattr -rd com.apple.quarantine "/Applications/3D Scan Prep Tool.app"
 
 ## Important Safety Note
 

@@ -76,7 +76,7 @@ Expected behavior:
 
 A fully working Mac build and installers is not yet available.
 Some in-progress scripts for mac exist but likely have bugs, or UI scaling errors.
-We may continue working on a fully installer and tested mac build in the future when avilable.
+We may continue working on an installer and tested mac build in the future when avilable.
 
 
 ## Building From Source

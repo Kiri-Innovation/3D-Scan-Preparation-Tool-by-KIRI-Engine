@@ -45,11 +45,6 @@ The Windows CUDA installer is split into one setup `.exe` plus one or more
 `.bin` data files because the full GPU-enabled build is large. Download all
 Windows installer parts into the same folder, then run `3D Scan Prep Tool.exe`.
 
-
-**macOS Security Warning**
-
-
-
 ## Important Safety Note
 
 Always work from a copy or backup of your scan data.

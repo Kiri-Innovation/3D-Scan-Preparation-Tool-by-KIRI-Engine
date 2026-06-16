@@ -13,14 +13,12 @@ sending it to reconstruction software.
 ## What It Does
 
 - Sort image sets into scan sessions.
-- Optionally preserve originals or move originals during cleanup workflows.
 - Detect blurry/weak images and isolate them for review.
 - Extract frames from normal videos.
 - Extract perspective views from 360/equirectangular video.
 - Create AI masks for subjects, skies/clouds, people/crowds, vehicles, and related distractions.
 - Preview masks and processing before running a full batch.
 - Apply scan-focused image processing such as contrast adjustment, local contrast boost, exposure-fusion look, and feature sharpening.
-- Read RAW and HEIC inputs for preview/processing workflows.
 - Use NVIDIA GPU acceleration on supported Windows systems, with CPU fallback.
 
 ## Installers

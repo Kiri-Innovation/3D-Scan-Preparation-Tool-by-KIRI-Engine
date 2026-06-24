@@ -2,7 +2,7 @@
 ; Build with windows/build_inno_installer.ps1 after packaging the Electron app.
 
 #define MyAppName "3D Scan Prep Tool"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "KIRI Tools"
 #define MyAppURL "www.kiriengine.app"
 #define MyAppExeName "3D Scan Prep Tool.exe"

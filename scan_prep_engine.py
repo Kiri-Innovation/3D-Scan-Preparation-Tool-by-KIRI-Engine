@@ -776,10 +776,14 @@ def get_scene_detector_options(cfg):
     return {"threshold": threshold, "min_scene_seconds": min_scene_seconds}
 
 def get_video_extraction_method(cfg, extract_mode):
-    if extract_mode != "Target Amount of Frames":
-        return "Accurate extraction"
     method = str((cfg or {}).get("vid_extract_method", "Fast extraction")).strip().lower()
     if method.startswith("accurate"):
+        return "Accurate extraction"
+    if extract_mode != "Target Amount of Frames":
+        input_type = str((cfg or {}).get("input_type", "")).strip().lower()
+        step = max(1, safe_int((cfg or {}).get("vid_ext_val", 10), 10))
+        if input_type == "folder_360" or step >= 30:
+            return "Fast extraction"
         return "Accurate extraction"
     return "Fast extraction"
 
@@ -1239,6 +1243,7 @@ def extract_video_frames(video_path, cache_dir, extract_mode, extract_val, do_sc
     total_extract = len(frames_to_extract)
     if total_extract > 0 and not cancel_flag:
         used_fast_extractor = False
+        timing_log.append(f"[VIDEO] Selected {extraction_method} for {extract_mode} ({total_extract} frame slot(s)).")
         if extraction_method == "Fast extraction":
             used_fast_extractor = run_ffmpeg_seek_video_extraction(
                 video_path,

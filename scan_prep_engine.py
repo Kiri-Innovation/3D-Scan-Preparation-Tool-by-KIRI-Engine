@@ -40,6 +40,52 @@ else:
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
     DATA_ROOT = APP_ROOT
 
+def get_user_runtime_root():
+    home_dir = os.path.expanduser("~")
+    if platform.system() == "Darwin":
+        platform_default = os.path.join(home_dir, "Library", "Application Support", "KIRI Tools", "ScanPrep")
+    elif platform.system() == "Windows":
+        platform_default = os.path.join(os.environ.get("LOCALAPPDATA", ""), "KIRI Tools", "ScanPrep")
+    else:
+        platform_default = os.path.join(os.environ.get("XDG_DATA_HOME", os.path.join(home_dir, ".local", "share")), "KIRI Tools", "ScanPrep")
+
+    candidates = [
+        os.environ.get("SCANPREP_USER_DIR"),
+        platform_default,
+        os.path.join(os.environ.get("APPDATA", ""), "KIRI Tools", "ScanPrep"),
+        os.path.join(tempfile.gettempdir(), "ScanPrep"),
+    ]
+    for candidate in candidates:
+        if not candidate:
+            continue
+        try:
+            os.makedirs(candidate, exist_ok=True)
+            return candidate
+        except Exception:
+            continue
+    return tempfile.gettempdir()
+
+USER_RUNTIME_ROOT = get_user_runtime_root()
+
+def set_runtime_env_path(env_name, *parts):
+    if os.environ.get(env_name):
+        return
+    try:
+        target = os.path.join(USER_RUNTIME_ROOT, *parts)
+        os.makedirs(target, exist_ok=True)
+        os.environ[env_name] = target
+    except Exception:
+        pass
+
+set_runtime_env_path("XDG_CACHE_HOME", "cache")
+set_runtime_env_path("YOLO_CONFIG_DIR", "ultralytics")
+set_runtime_env_path("ULTRALYTICS_CONFIG_DIR", "ultralytics")
+set_runtime_env_path("MPLCONFIGDIR", "matplotlib")
+set_runtime_env_path("HF_HOME", "huggingface")
+set_runtime_env_path("HF_HUB_CACHE", "huggingface", "hub")
+set_runtime_env_path("TRANSFORMERS_CACHE", "huggingface", "transformers")
+set_runtime_env_path("TORCH_HOME", "torch")
+
 # --- 🚨 THE DLL RESCUE MISSION (CROSS-PLATFORM SAFE) 🚨 ---
 if platform.system() == "Windows" and getattr(sys, 'frozen', False):
     try:

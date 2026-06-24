@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, shell } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, shell, screen } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
@@ -8,6 +8,44 @@ const rootDir = path.resolve(__dirname, "..");
 let activeBackend = null;
 let cancelRequested = false;
 let cancelEscalationTimer = null;
+
+function ensureDir(dirPath) {
+  try {
+    fs.mkdirSync(dirPath, { recursive: true });
+    return dirPath;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function getBackendRuntimeEnv() {
+  const userRoot = ensureDir(path.join(app.getPath("userData"), "runtime"))
+    || ensureDir(path.join(os.tmpdir(), "ScanPrepTool", "runtime"))
+    || os.tmpdir();
+  const cacheRoot = ensureDir(path.join(userRoot, "cache")) || userRoot;
+  const ultralyticsDir = ensureDir(path.join(userRoot, "ultralytics")) || userRoot;
+  const matplotlibDir = ensureDir(path.join(userRoot, "matplotlib")) || userRoot;
+  const hfRoot = ensureDir(path.join(userRoot, "huggingface")) || userRoot;
+  const hfHubDir = ensureDir(path.join(hfRoot, "hub")) || hfRoot;
+  const transformersDir = ensureDir(path.join(hfRoot, "transformers")) || hfRoot;
+  const torchDir = ensureDir(path.join(userRoot, "torch")) || userRoot;
+
+  return {
+    ...process.env,
+    PYTHONUTF8: "1",
+    PYTHONIOENCODING: "utf-8",
+    PYTHONDONTWRITEBYTECODE: "1",
+    SCANPREP_USER_DIR: userRoot,
+    XDG_CACHE_HOME: process.env.XDG_CACHE_HOME || cacheRoot,
+    YOLO_CONFIG_DIR: process.env.YOLO_CONFIG_DIR || ultralyticsDir,
+    ULTRALYTICS_CONFIG_DIR: process.env.ULTRALYTICS_CONFIG_DIR || ultralyticsDir,
+    MPLCONFIGDIR: process.env.MPLCONFIGDIR || matplotlibDir,
+    HF_HOME: process.env.HF_HOME || hfRoot,
+    HF_HUB_CACHE: process.env.HF_HUB_CACHE || hfHubDir,
+    TRANSFORMERS_CACHE: process.env.TRANSFORMERS_CACHE || transformersDir,
+    TORCH_HOME: process.env.TORCH_HOME || torchDir
+  };
+}
 
 function getBackendTarget() {
   if (process.env.SCANPREP_BACKEND_EXE && fs.existsSync(process.env.SCANPREP_BACKEND_EXE)) {
@@ -88,12 +126,7 @@ function runPythonBackend(webContents, args) {
   const backend = getBackendTarget();
   const child = spawn(backend.executable, [...backend.argsPrefix, ...args], {
     cwd: backend.cwd,
-    env: {
-      ...process.env,
-      PYTHONUTF8: "1",
-      PYTHONIOENCODING: "utf-8",
-      PYTHONDONTWRITEBYTECODE: "1"
-    },
+    env: getBackendRuntimeEnv(),
     windowsHide: true
   });
 
@@ -132,12 +165,7 @@ function runPythonJson(args) {
   return new Promise((resolve) => {
     const child = spawn(backend.executable, [...backend.argsPrefix, ...args], {
       cwd: backend.cwd,
-      env: {
-        ...process.env,
-        PYTHONUTF8: "1",
-        PYTHONIOENCODING: "utf-8",
-        PYTHONDONTWRITEBYTECODE: "1"
-      },
+      env: getBackendRuntimeEnv(),
       windowsHide: true
     });
 
@@ -169,11 +197,19 @@ function readTextTail(filePath, maxChars = 24000) {
 }
 
 function createWindow() {
+  const workArea = screen.getPrimaryDisplay().workAreaSize;
+  const availableWidth = Math.max(360, workArea.width - 32);
+  const availableHeight = Math.max(520, workArea.height - 32);
+  const windowWidth = Math.min(1760, availableWidth);
+  const windowHeight = Math.min(990, availableHeight);
+  const minWidth = Math.min(720, windowWidth);
+  const minHeight = Math.min(560, windowHeight);
+
   const win = new BrowserWindow({
-    width: 1760,
-    height: 990,
-    minWidth: 1366,
-    minHeight: 768,
+    width: windowWidth,
+    height: windowHeight,
+    minWidth,
+    minHeight,
     backgroundColor: "#061114",
     title: "KIRI Tools - ScanPrep",
     icon: path.join(rootDir, "Images and Icons", "KIRI Logo ICO.ico"),

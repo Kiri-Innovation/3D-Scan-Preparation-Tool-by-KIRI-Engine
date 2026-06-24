@@ -23,6 +23,8 @@ import multiprocessing
 import traceback
 import json
 import tempfile
+import contextlib
+import io
 
 # --- THE BLACK HOLE (Prevents PyInstaller sys.stdout crashes) ---
 class NullWriter:
@@ -95,14 +97,24 @@ if platform.system() == "Windows" and getattr(sys, 'frozen', False):
         pass
 
 # --- 🚨 AI IMPORTS 🚨 ---
+AI_IMPORT_ERROR = ""
+AI_IMPORT_OUTPUT = ""
 try:
-    import torch
-    from torchvision import transforms
-    from ultralytics import YOLO
-    from transformers import AutoModelForImageSegmentation, MaskFormerImageProcessor, MaskFormerForInstanceSegmentation
+    _ai_import_stdout = io.StringIO()
+    _ai_import_stderr = io.StringIO()
+    with contextlib.redirect_stdout(_ai_import_stdout), contextlib.redirect_stderr(_ai_import_stderr):
+        import torch
+        from torchvision import transforms
+        from ultralytics import YOLO
+        from transformers import AutoModelForImageSegmentation, MaskFormerImageProcessor, MaskFormerForInstanceSegmentation
+    AI_IMPORT_OUTPUT = "\n".join(
+        part.strip()
+        for part in (_ai_import_stdout.getvalue(), _ai_import_stderr.getvalue())
+        if part.strip()
+    )
     AI_LIBRARIES_LOADED = True
 except Exception as e:
-    print(f"CRITICAL AI IMPORT ERROR: {e}")
+    AI_IMPORT_ERROR = str(e).replace("\n", " ").strip()
     AI_LIBRARIES_LOADED = False
 
 # --- STANDARD LIBRARIES ---
@@ -351,6 +363,8 @@ def get_ai_runtime_log_lines(device="cpu"):
         f"Data root: {DATA_ROOT}",
     ]
     if not AI_LIBRARIES_LOADED:
+        if AI_IMPORT_ERROR:
+            lines.append(f"AI import error: {AI_IMPORT_ERROR}")
         return lines
 
     try:
@@ -2517,6 +2531,7 @@ def get_system_diagnostics_payload(cfg=None):
         },
         "ai": {
             "torch": torch_info,
+            "import_error": AI_IMPORT_ERROR,
             "models": {
                 "yolo": os.path.exists(os.path.join(model_root, "YOLO", "yolo26n-seg.pt")) or os.path.exists(os.path.join(model_root, "YOLO", "yolov8n-seg.pt")),
                 "maskformer": os.path.isdir(os.path.join(model_root, "MaskFormer")),

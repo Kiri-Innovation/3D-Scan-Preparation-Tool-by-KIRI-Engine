@@ -9,6 +9,8 @@ let activeBackend = null;
 let cancelRequested = false;
 let cancelEscalationTimer = null;
 
+app.setName("3D Scan Prep Tool");
+
 function ensureDir(dirPath) {
   try {
     fs.mkdirSync(dirPath, { recursive: true });
@@ -18,10 +20,23 @@ function ensureDir(dirPath) {
   }
 }
 
-function getBackendRuntimeEnv() {
-  const userRoot = ensureDir(path.join(app.getPath("userData"), "runtime"))
+function getScanPrepUserRoot() {
+  let baseDir = "";
+  if (process.platform === "win32") {
+    baseDir = process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local");
+  } else if (process.platform === "darwin") {
+    baseDir = path.join(os.homedir(), "Library", "Application Support");
+  } else {
+    baseDir = process.env.XDG_DATA_HOME || path.join(os.homedir(), ".local", "share");
+  }
+  return ensureDir(path.join(baseDir, "KIRI Tools", "ScanPrep"))
+    || ensureDir(path.join(app.getPath("userData"), "runtime"))
     || ensureDir(path.join(os.tmpdir(), "ScanPrepTool", "runtime"))
     || os.tmpdir();
+}
+
+function getBackendRuntimeEnv() {
+  const userRoot = getScanPrepUserRoot();
   const cacheRoot = ensureDir(path.join(userRoot, "cache")) || userRoot;
   const ultralyticsDir = ensureDir(path.join(userRoot, "ultralytics")) || userRoot;
   const matplotlibDir = ensureDir(path.join(userRoot, "matplotlib")) || userRoot;
